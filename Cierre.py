@@ -14,77 +14,79 @@ OUTPUT_FILE = INPUT_FILE.parent / r"C:\Users\iazuaz\OneDrive - Ripley Corp\Docum
 # Mapeo (TABLA 1) actividad -> categoría consolidada (por día)
 # -------------------------------
 CATEGORIES_ORDER = [
-    "Ausencia",
-    "Capacitación Jornada Completa",
-    "Capacitación sin Conexión Jornada Completa",
-    "Corte de Luz Jornada Completa",
     "Festivo",
+    "Gestión",
     "Libre",
     "Licencia Médica",
-    "Permiso Especial Diario",
     "Presente",
-    "Sin Internet Jornada Completa",
-    "Sin Equipos Jornada Completa",
     "Vacaciones",
-    "Desvinculación",
 ]
 
 CATEGORIES_MAP_EXACT = {
+    "actualización de programa": "Gestión",
+    "actualizacion de programa": "Gestión",
     "en la cola": "Presente",
-    "descanso 15 min": "Presente",
+    "descanso 15 min": "Libre",
     "tiempo libre": "Libre",
     "festivo": "Festivo",
-    "no se presenta": "Ausencia",
+    "no se presenta": "Libre",
     "dia libre": "Libre",
     "descanso vf": "Libre",
-    "comida full": "Presente",
-    "problemas técnicos (internet)": "Sin Internet Jornada Completa",
+    "comida full": "Libre",
+    "problemas técnicos (internet)": "Gestión",
     "vacaciones": "Vacaciones",
-    "problemas técnicos (equipo)": "Sin Equipos Jornada Completa",
-    "problemas técnicos (corte de luz)": "Corte de Luz Jornada Completa",
+    "problemas técnicos (equipo)": "Gestión",
+    "problemas técnicos (corte de luz)": "Gestión",
     "licencia médica": "Licencia Médica",
     "descanso vf banco": "Libre",
-    "permiso especial por horas": "Permiso Especial Diario",
-    "permiso con devolución de horas": "Permiso Especial Diario",
-    "devolución horas": "Permiso Especial Diario",
+    "permiso especial por horas": "Gestión",
+    "permiso con devolución de horas": "Gestión",
+    "devolución horas": "Gestión",
     "vive tu momentos": "Libre",
-    "desvinculación": "Desvinculación",
-    "capacitación jornada completa": "Capacitación Jornada Completa",
-    "capacitación": "Presente",
-    "permiso con descuento": "Permiso Especial Diario",
+    "vive tus momentos": "Libre",
+    "desvinculación": "Gestión",
+    "capacitación jornada completa": "Gestión",
+    "capacitación": "Gestión",
+    "permiso con descuento": "Gestión",
     "vacaciones en día libre": "Vacaciones",
     "licencia médica en día libre": "Licencia Médica",
-    "problemas técnicos (bloqueo/reseteo cuenta)": "Sin Equipos Jornada Completa",
-    "permiso especial diario": "Permiso Especial Diario",
-    "fuero maternal": "Permiso Especial Diario",
+    "problemas técnicos (bloqueo/reseteo cuenta)": "Gestión",
+    "permiso especial diario": "Gestión",
+    "fuero maternal": "Gestión",
 }
 
 REGLAS_CONTAINS = [
-    ("capacitación sin conexión", "Capacitación sin Conexión Jornada Completa"),
-    ("sin equipos", "Sin Equipos Jornada Completa"),
-    ("sin equipo", "Sin Equipos Jornada Completa"),
-    ("corte de luz", "Corte de Luz Jornada Completa"),
+    ("actualizacion de programa", "Gestión"),
+    ("capacitación sin conexión", "Gestión"),
+    ("sin equipos", "Gestión"),
+    ("sin equipo", "Gestión"),
+    ("corte de luz", "Gestión"),
     ("licencia médica", "Licencia Médica"),
     ("vacacion", "Vacaciones"),
     ("descanso", "Libre"),
     ("día libre", "Libre"),
     ("dia libre", "Libre"),
-    ("no se presenta", "Ausencia"),
-    ("internet", "Sin Internet Jornada Completa"),
-    ("sin internet", "Sin Internet Jornada Completa"),
+    ("no se presenta", "Libre"),
+    ("internet", "Gestión"),
+    ("sin internet", "Gestión"),
+    ("gestión", "Gestión"),
+    ("gestion", "Gestión"),
 ]
 
 DEFAULT_CATEGORY = "Presente"
 
 # -------------------------------
-# Mapeo (TABLA 2) SOLO estas 5 categorías de minutos
+# Mapeo (TABLA 2) categorías de minutos permitidas
 # -------------------------------
 MINUTES_CATS = [
+    "Actualización de Programa",
     "Capacitación",
+    "Gestión",
     "Permiso con Descuento",
     "Problemas Equipo",
     "Problemas Internet",
-    "Vive tu momentos",
+    "Reunión",
+    "Vive tus momentos",
 ]
 
 # ---------- utilidades de nombres ----------
@@ -209,16 +211,23 @@ def clasifica_categoria_minutos(nombre_actividad: str):
     if not isinstance(nombre_actividad, str):
         return None
     s = nombre_actividad.strip().lower()
+    s_norm = normalize_name(nombre_actividad)
+    if "actualización de programa" in s or "actualizacion de programa" in s_norm:
+        return "Actualización de Programa"
     if "capacita" in s:
         return "Capacitación"
+    if "gestión" in s or "gestion" in s_norm:
+        return "Gestión"
     if "permiso con descuento" in s:
         return "Permiso con Descuento"
     if "internet" in s or "sin internet" in s:
         return "Problemas Internet"
-    if any(k in s for k in ["equipo", "sin equipo", "sin equipos", "bloqueo", "reseteo", "cuenta"]):
+    if any(k in s_norm for k in ["equipo", "sin equipo", "sin equipos", "bloqueo", "reseteo", "cuenta"]):
         return "Problemas Equipo"
-    if "vive tu momentos" in s:
-        return "Vive tu momentos"
+    if "reunión" in s or "reunion" in s_norm:
+        return "Reunión"
+    if "vive tu momentos" in s or "vive tus momentos" in s_norm:
+        return "Vive tus momentos"
     return None
 
 # ---------- tablas ----------
